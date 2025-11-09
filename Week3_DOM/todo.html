@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Simple Todo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: system-ui, Arial; max-width:700px; margin:40px auto; padding:0 16px; }
+        header { display:flex; gap:8px; margin-bottom:16px; align-items:center; }
+        input[type="text"]{ flex:1; padding:8px; font-size:16px; }
+        button{ padding:8px 12px; font-size:14px; }
+        ul{ list-style:none; padding:0; margin:0; }
+        li{ display:flex; align-items:center; gap:8px; padding:8px 4px; border-bottom:1px solid #eee; }
+        li.completed span { text-decoration:line-through; color:#888; }
+        .spacer{ margin-left:auto; display:flex; gap:6px; }
+        .small{ font-size:12px; color:#666; }
+        button.icon{ background:none; border:none; cursor:pointer; padding:4px; }
+    </style>
+</head>
+<body>
+    <h1>Todo</h1>
+    <form id="todo-form">
+        <header>
+            <input id="todo-input" type="text" placeholder="Add a task..." autocomplete="off" />
+            <button type="submit">Add</button>
+        </header>
+    </form>
+
+    <ul id="todo-list" aria-live="polite"></ul>
+
+    <p class="small" id="counts"></p>
+
+    <script>
+        // Simple todo app using only HTML + JS, persisted in localStorage
+        const form = document.getElementById('todo-form');
+        const input = document.getElementById('todo-input');
+        const list = document.getElementById('todo-list');
+        const counts = document.getElementById('counts');
+        const STORAGE_KEY = 'simple_todos_v1';
+
+        let todos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+            render();
+        }
+
+        function render() {
+            list.innerHTML = '';
+            if (todos.length === 0) {
+                list.innerHTML = '<li class="small">No todos yet</li>';
+                counts.textContent = '';
+                return;
+            }
+            todos.forEach((t, i) => {
+                const li = document.createElement('li');
+                if (t.done) li.classList.add('completed');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = !!t.done;
+                checkbox.addEventListener('change', () => {
+                    todos[i].done = checkbox.checked;
+                    save();
+                });
+
+                const span = document.createElement('span');
+                span.textContent = t.text;
+                span.style.cursor = 'text';
+                span.title = 'Double-click to edit';
+                span.addEventListener('dblclick', () => {
+                    const edited = prompt('Edit task', t.text);
+                    if (edited === null) return;
+                    todos[i].text = edited.trim() || t.text;
+                    save();
+                });
+
+                const spacer = document.createElement('div');
+                spacer.className = 'spacer';
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'icon';
+                delBtn.title = 'Delete';
+                delBtn.textContent = '🗑';
+                delBtn.addEventListener('click', () => {
+                    todos.splice(i, 1);
+                    save();
+                });
+
+                spacer.appendChild(delBtn);
+                li.appendChild(checkbox);
+                li.appendChild(span);
+                li.appendChild(spacer);
+                list.appendChild(li);
+            });
+
+            const done = todos.filter(t => t.done).length;
+            counts.textContent = `${done} / ${todos.length} done`;
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const text = input.value.trim();
+            if (!text) return;
+            todos.unshift({ text, done: false, created: Date.now() });
+            input.value = '';
+            save();
+            input.focus();
+        });
+
+        // keyboard: Enter to submit, Esc to clear input
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') input.value = '';
+        });
+
+        // initial render
+        render();
+    </script>
+</body>
+</html>

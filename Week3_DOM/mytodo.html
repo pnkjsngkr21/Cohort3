@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Simple Todo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+    </style>
+</head>
+
+<body>
+    <h1>Todo</h1>
+    <input id="todo-input" type="text" placeholder="Add a task..." />
+    <button onclick="addTodo()">Add</button>
+
+    <div id="todo-list"></div>
+
+    <script>
+        let todos = [];
+        const inputEL = document.querySelector("input");
+
+
+        function addTodo() {
+            if (inputEL.value === "") {
+                return;
+            }
+            todos.push({
+                title: inputEL.value
+            })
+            inputEL.value = "";
+            render();
+        }
+
+        function deleteTodo(index){
+            todos.splice(index, 1);
+            render();
+        }
+
+        function render() {
+            const listDiv = document.getElementById("todo-list");
+
+            listDiv.innerHTML = '';
+
+            todos.forEach((element, index) => {
+                const divEL = document.createElement("div");
+                const spanEl = document.createElement("span");
+                const bNode = document.createElement("button");
+
+                listDiv.appendChild(divEL);
+                divEL.appendChild(spanEl);
+                divEL.appendChild(bNode);
+
+                spanEl.innerHTML = element.title;
+                bNode.innerText = "Delete";
+                bNode.setAttribute("onClick", "deleteTodo("+index+")");
+            });
+
+        }
+
+
+
+    </script>
+</body>
+
+</html>
