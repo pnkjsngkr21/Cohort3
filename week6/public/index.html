@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Authentication Example</title>
+</head>
+
+<body>
+    <h1>JWT Authentication Example</h1>
+    <div id="signup">
+        <h2>Sign Up</h2>
+        <input type="text" id="signup-username" placeholder="Username">
+        <input type="password" id="signup-password" placeholder="Password">
+        <button onclick="signup()">Sign Up</button>
+        <span id="signup-message" style="color: blue; display: block;"></span>
+    </div>
+    <div id="login">
+        <h2>Log In</h2>
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Log In</button>
+        <span id="login-message" style="color: blue; display: block;"></span>
+    </div>
+    <div id="me">
+        <h2 id="welcome-message"></h2>
+    </div>
+    <div id="signout" style="display: none;">
+        <button onclick="logout()">Sign Out!</button>
+    </div>
+    <script>
+        async function signup() {
+            const username = document.getElementById("signup-username").value;
+            const password = document.getElementById("signup-password").value;
+
+            try {
+                const resp = await fetch("/signup", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                const body = await resp.json();
+                if (resp.ok) {
+                    document.getElementById("signup-message").innerHTML = body.message;
+                }
+            } catch (err) {
+                console.log("Error calling singup");
+                console.log(err);
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+
+            try {
+                const resp = await fetch("/signin", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                })
+
+                const data = await resp.json();
+                if (resp.ok) {
+                    document.getElementById("login-message").innerHTML = "Sucessfully Logged In";
+                    localStorage.setItem("token", data.token);
+                    location.reload();
+                }
+
+            } catch (err) {
+                console.log("Error in login");
+                console.log(err);
+            }
+        }
+
+        async function getMe() {
+            const token = localStorage.getItem("token");
+            if(!token){
+                return
+            }
+
+            try {
+                const response = await fetch("/me", {
+                    method: 'GET',
+                    headers: {
+                        authorization: localStorage.getItem("token")
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById("welcome-message").innerHTML = "Welcome " + data.username;
+                    document.getElementById("login").style.display = "none";
+                    document.getElementById("signup").style.display = "none";
+                    document.getElementById("signout").style.display = "block";
+                }
+
+            }catch(err){
+                console.log("Error getting user info");
+            }
+            
+        }
+
+        function logout(){
+            localStorage.removeItem("token");
+            document.getElementById("login").style.display = "block";
+            document.getElementById("signup").style.display = "block";
+            document.getElementById("me").style.display = "none";
+            document.getElementById("signout").style.display = "none";
+        }
+
+        window.onload = getMe;
+    </script>
+
+</body>
+
+</html>
