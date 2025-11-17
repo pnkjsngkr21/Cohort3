@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 
-mongoose.connect(process.env.MONGO_URI)
 
 
 const User = new Schema({

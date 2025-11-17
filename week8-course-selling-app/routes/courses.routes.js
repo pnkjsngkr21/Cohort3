@@ -15,18 +15,7 @@ router.post("/update", (req, res) => {
 
 })
 
-app.post("/purchase", userAuth, (req, res) => {
-
-})
-
-app.get("/courses", userAuth, (req, res) => {
-
-    const courses = CourseModel.find({})
-
-    res.json({
-        courses: courses
-    })
-})
 
 
-module.exports = { router}
+
+module.exports = router;
