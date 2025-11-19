@@ -1,9 +1,10 @@
 const express = require('express');
-const { UserModel } = require('../db')
+const { UserModel, PurchaseModel, CourseModel } = require('../db')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const z = require('zod');
 const userAuth = require('./../middleware/user')
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -88,10 +89,15 @@ router.post("/login", async (req, res) => {
 
 router.get("/purchases", userAuth, async (req, res) => {
 
-    const userId = req.header.userId;
+    const userId = req.headers.userId;
 
+    const myPurchases = await PurchaseModel.find({
+        userId: userId
+    })
+
+    const courseIds = myPurchases.map(purchase => purchase.courseId);
     const mycourses = await CourseModel.find({
-        userId: new mongoose.Schema.ObjectId(userId)
+        _id: { $in: courseIds }
     })
 
     res.json({
@@ -101,16 +107,36 @@ router.get("/purchases", userAuth, async (req, res) => {
 })
 
 router.post("/purchase", userAuth, async (req, res) => {
+    const userId = req.headers.userId;
+    const courseId = req.body.courseId;
+
+    try {
+        const purchase = await PurchaseModel.create({
+            courseId: courseId,
+            userId: userId
+        })
+
+        console.log(purchase);
+
+        res.json({
+            message: "Course purchased"
+        })
+    }catch(err){
+        res.status(400).json({
+            messsage: err
+        })
+    }
 
 })
 
-router.get("/courses", userAuth, async (req, res) => {
+router.get("/preview", userAuth, async (req, res) => {
     try {
         const courses = await CourseModel.find({})
         res.json(courses)
     } catch (err) {
+        console.log(err);
         res.status(500).json({
-            mesaage: err.mesaage
+            mesaage: err
         })
     }
 })
