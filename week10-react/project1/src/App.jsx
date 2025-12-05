@@ -21,10 +21,10 @@ function App() {
 function Header() {
   return (
     <>
-            <Link to="/">Home</Link> |
-        <Link to="/neet/class-11">Class 11</Link> |
-        <Link to="/neet/class-12">Class 12</Link>
-        </>
+      <Link to="/">Home</Link> |
+      <Link to="/neet/class-11">Class 11</Link> |
+      <Link to="/neet/class-12">Class 12</Link>
+    </>
   )
 }
 
