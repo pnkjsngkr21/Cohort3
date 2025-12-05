@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, createContext} from 'react'
 import './App.css'
+import { useContext } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+
+const BulbContext = createContext();
+
+function BulbProvider({ children }) {
+  const [bulbState, setBulbState] = useState(true);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <BulbContext.Provider value={{ bulbState: bulbState, setBulbState: setBulbState }}>
+      {children}
+    </BulbContext.Provider>
   )
+}
+
+function App() {
+
+  return (
+
+    <div>
+      <BulbProvider>
+        <LightBulb />
+      </BulbProvider>
+    </div>
+  )
+}
+
+function LightBulb() {
+
+  return (
+    <div>
+      <BulbState/>
+      <ToggleBulbState/>
+    </div>
+  )
+}
+
+function BulbState() {
+  const {bulbState} = useContext(BulbContext);
+
+  return (
+    <div>
+      {bulbState ? <span style={{ color: 'green' }}>"Bulb is on" </span> : <span style={{ color: 'red' }}>"Bulb is off"</span>}
+    </div>
+  )
+
+}
+
+function ToggleBulbState() {
+  const {setBulbState} = useContext(BulbContext);
+
+  return (
+    <div>
+      <button onClick={() => setBulbState((prevState) => !prevState)}>Toogle the bulb</button>
+    </div>
+  )
+
 }
 
 export default App
